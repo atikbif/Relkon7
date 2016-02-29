@@ -102,18 +102,20 @@ unsigned short get_adc(unsigned char num)
 
 void adc_write_set(unsigned char num)
 {
-	/*if(num>5) num=0;
+	if(num>7) num=0;
 	i2c.direction = TRANSMIT;
 	i2c.send_amount=3;
 	i2c.tx[0] = 0x01;
 	switch(num)
 	{
-		case 0:i2c.addr = 0x92;i2c.tx[1] = 0xC4;break;
-		case 1:i2c.addr = 0x92;i2c.tx[1] = 0xD4;break;
-		case 2:i2c.addr = 0x92;i2c.tx[1] = 0xE4;break;
-		case 3:i2c.addr = 0x92;i2c.tx[1] = 0xF4;break;
-		case 4:i2c.addr = 0x90;i2c.tx[1] = 0xD4;break;
-		case 5:i2c.addr = 0x90;i2c.tx[1] = 0xC4;break;
+		case 0:i2c.addr = 0x92;i2c.tx[1] = 0xF4;break;
+		case 1:i2c.addr = 0x92;i2c.tx[1] = 0xE4;break;
+		case 2:i2c.addr = 0x92;i2c.tx[1] = 0xD4;break;
+		case 3:i2c.addr = 0x92;i2c.tx[1] = 0xC4;break;
+		case 4:i2c.addr = 0x90;i2c.tx[1] = 0xF4;break;
+		case 5:i2c.addr = 0x90;i2c.tx[1] = 0xE4;break;
+		case 6:i2c.addr = 0x90;i2c.tx[1] = 0xD4;break;
+		case 7:i2c.addr = 0x90;i2c.tx[1] = 0xC4;break;
 	}
 	i2c.tx[2] = 0xD3;
 	if((GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_8)==Bit_SET) && (GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_9)==Bit_SET))
@@ -125,12 +127,12 @@ void adc_write_set(unsigned char num)
 	{
 		i2c.err++;
 		if(i2c.err>=1000){i2c.err=0;ext_adc_init();}
-	}*/
+	}
 }
 
 void get_ext_adc(void)
 {
-/*	i2c.direction = RECEIVE;
+	i2c.direction = RECEIVE;
 	i2c.tx[0]=0x00;
 	i2c.stat=0;
 	if((GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_8)==Bit_SET) && (GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_9)==Bit_SET))
@@ -142,16 +144,25 @@ void get_ext_adc(void)
 	{
 		i2c.err++;
 		if(i2c.err>=1000){i2c.err=0;ext_adc_init();}
-	}*/
+	}
 }
 
 void ext_adc_init(void)
 {
-/*	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure;
 	I2C_InitTypeDef   I2C_InitStructure;
 	NVIC_InitTypeDef  NVIC_InitStructure;
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+	
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8 | GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_8); // delay;
+
+	if((GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_8)==Bit_RESET) || (GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_9)==Bit_RESET)) return;
+	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
@@ -164,14 +175,6 @@ void ext_adc_init(void)
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
-
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8 | GPIO_Pin_9;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-	if((GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_8)==Bit_RESET) || (GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_9)==Bit_RESET)) return;
-
 
 	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8 | GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -188,14 +191,16 @@ void ext_adc_init(void)
 	I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_InitStructure.I2C_ClockSpeed = ClockSpeed;
-	I2C_Init(I2C1, &I2C_InitStructure);*/
+	I2C_Init(I2C1, &I2C_InitStructure);
 }
 
 void I2C1_EV_IRQHandler(void)
 {
+	i2c_debug++;
 	switch(i2c.direction)
 	{
 		case TRANSMIT:
+			i2c_debug++;
 			switch (I2C_GetLastEvent(I2C1))
 			{
 				case I2C_EVENT_MASTER_MODE_SELECT:
@@ -268,6 +273,7 @@ void I2C1_EV_IRQHandler(void)
 void I2C1_ER_IRQHandler(void)
 {
 	/* Check on I2C2 AF flag and clear it */
+	i2c_debug++;
 	if (I2C_GetITStatus(I2C1, I2C_IT_AF))
 	{
 		I2C_ClearITPendingBit(I2C1, I2C_IT_AF);

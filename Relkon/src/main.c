@@ -80,6 +80,7 @@ int main(void)
   led_init();			// инициализация светодиода, индицирующего работу процессора
   init_calendar();		// инициализация календаря
   _SPI_init();			// SPI для внешней FRAM
+  init_adc();
 
   // чтение заводских установок
 
@@ -171,11 +172,15 @@ int main(void)
 void vApplicationTickHook( void )	// вызывается каждую миллисекунду
 {
 	static unsigned char ext_cnt=0,anum=0;
+	double ain;
 	switch(ext_cnt)
 	{
 		case 0:
-			_EA[anum++]=ext_adc;
-			if(anum>5) anum=0;
+		    ain = (double)ext_adc * 1.08;
+		    if(ain>65535) ain = 65535;
+			_EA[7-anum]=ain;
+			anum++;
+			if(anum>7) anum=0;
 			adc_write_set(anum);
 			break;
 		case 1:case 2:
@@ -217,7 +222,8 @@ static void prvFlashTask( void *pvParameters )
     static unsigned long s_tmr=0;
 
     unsigned char tmp;
-    init_adc();init_dac();		// инициализация ацп и цап
+    //init_adc();
+	init_dac();		// инициализация ацп и цап
     update_code();				// обновление кодового слова в FRAM
     FLLastExecutionTime = xTaskGetTickCount();
     for( ;; )
