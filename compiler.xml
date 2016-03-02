@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rcompiler>
+<linkSource pattern="cPat" out="fc_u.o">fc_u.c</linkSource>
+
+<source pattern="cPat" out="canal.o">canal.c</source>
+<source pattern="cPat" out="core_cm3.o">core_cm3.c</source>
+<source pattern="cPat" out="crc.o">crc.c</source>
+<source pattern="cPat" out="croutine.o">croutine.c</source>
+<source pattern="cPat" out="eth_task.o">eth_task.c</source>
+<source pattern="cPat" out="exchange.o">exchange.c</source>
+<source pattern="cPat" out="fat_access.o">fat_access.c</source>
+<source pattern="cPat" out="fat_cache.o">fat_cache.c</source>
+<source pattern="cPat" out="fat_filelib.o">fat_filelib.c</source>
+<source pattern="cPat" out="fat_format.o">fat_format.c</source>
+<source pattern="cPat" out="fat_misc.o">fat_misc.c</source>
+<source pattern="cPat" out="fat_string.o">fat_string.c</source>
+<source pattern="cPat" out="fat_table.o">fat_table.c</source>
+<source pattern="cPat" out="fat_write.o">fat_write.c</source>
+<source pattern="cPat" out="fram.o">fram.c</source>
+<source pattern="cPat" out="hain.o">hain.c</source>
+<source pattern="cPat" out="hcanal.o">hcanal.c</source>
+<source pattern="cPat" out="hdac.o">hdac.c</source>
+<source pattern="cPat" out="heap_2.o">heap_2.c</source>
+<source pattern="cPat" out="heth.o">heth.c</source>
+<source pattern="cPat" out="hfram.o">hfram.c</source>
+<source pattern="cPat" out="hinout.o">hinout.c</source>
+<source pattern="cPat" out="hlcd.o">hlcd.c</source>
+<source pattern="cPat" out="hmain.o">hmain.c</source>
+<source pattern="cPat" out="hsd.o">hsd.c</source>
+<source pattern="cPat" out="htime.o">htime.c</source>
+<source pattern="cPat" out="http_data.o">http_data.c</source>
+<source pattern="cPat" out="inout.o">inout.c</source>
+<source pattern="cPat" out="k_arp.o">k_arp.c</source>
+<source pattern="cPat" out="k_http.o">k_http.c</source>
+<source pattern="cPat" out="k_icmp.o">k_icmp.c</source>
+<source pattern="cPat" out="k_ip.o">k_ip.c</source>
+<source pattern="cPat" out="k_mac.o">k_mac.c</source>
+<source pattern="cPat" out="k_main.o">k_main.c</source>
+<source pattern="cPat" out="k_tcp.o">k_tcp.c</source>
+<source pattern="cPat" out="k_udp.o">k_udp.c</source>
+<source pattern="cPat" out="lcd.o">lcd.c</source>
+<source pattern="cPat" out="list.o">list.c</source>
+<source pattern="cPat" out="main.o">main.c</source>
+<source pattern="cPat" out="master.o">master.c</source>
+<source pattern="cPat" out="misc.o">misc.c</source>
+<source pattern="cPat" out="mmb.o">mmb.c</source>
+<source pattern="cPat" out="modbus.o">modbus.c</source>
+<source pattern="cPat" out="modbustcp.o">modbustcp.c</source>
+<source pattern="cPat" out="modem.o">modem.c</source>
+<source pattern="cPat" out="port.o">port.c</source>
+<source pattern="cPat" out="print.o">print.c</source>
+<source pattern="cPat" out="queue.o">queue.c</source>
+<source pattern="cPat" out="rk.o">rk.c</source>
+<source pattern="cPat" out="sdcard.o">sdcard.c</source>
+<source pattern="cPat" out="stm32_eth.o">stm32_eth.c</source>
+<source pattern="cPat" out="stm32f10x_adc.o">stm32f10x_adc.c</source>
+<source pattern="cPat" out="stm32f10x_bkp.o">stm32f10x_bkp.c</source>
+<source pattern="cPat" out="stm32f10x_can.o">stm32f10x_can.c</source>
+<source pattern="cPat" out="stm32f10x_crc.o">stm32f10x_crc.c</source>
+<source pattern="cPat" out="stm32f10x_dac.o">stm32f10x_dac.c</source>
+<source pattern="cPat" out="stm32f10x_dbgmcu.o">stm32f10x_dbgmcu.c</source>
+<source pattern="cPat" out="stm32f10x_dma.o">stm32f10x_dma.c</source>
+<source pattern="cPat" out="stm32f10x_exti.o">stm32f10x_exti.c</source>
+<source pattern="cPat" out="stm32f10x_flash.o">stm32f10x_flash.c</source>
+<source pattern="cPat" out="stm32f10x_fsmc.o">stm32f10x_fsmc.c</source>
+<source pattern="cPat" out="stm32f10x_gpio.o">stm32f10x_gpio.c</source>
+<source pattern="cPat" out="stm32f10x_i2c.o">stm32f10x_i2c.c</source>
+<source pattern="cPat" out="stm32f10x_iwdg.o">stm32f10x_iwdg.c</source>
+<source pattern="cPat" out="stm32f10x_pwr.o">stm32f10x_pwr.c</source>
+<source pattern="cPat" out="stm32f10x_rcc.o">stm32f10x_rcc.c</source>
+<source pattern="cPat" out="stm32f10x_rtc.o">stm32f10x_rtc.c</source>
+<source pattern="cPat" out="stm32f10x_sdio.o">stm32f10x_sdio.c</source>
+<source pattern="cPat" out="stm32f10x_spi.o">stm32f10x_spi.c</source>
+<source pattern="cPat" out="stm32f10x_tim.o">stm32f10x_tim.c</source>
+<source pattern="cPat" out="stm32f10x_usart.o">stm32f10x_usart.c</source>
+<source pattern="cPat" out="stm32f10x_wwdg.o">stm32f10x_wwdg.c</source>
+<source pattern="cPat" out="string_func.o">string_func.c</source>
+<source pattern="cPat" out="system_stm32f10x.o">system_stm32f10x.c</source>
+<source pattern="cPat" out="tasks.o">tasks.c</source>
+<source pattern="asmPat" out="startup_stm32f10x_cl.o">startup_stm32f10x_cl.s</source>
+
+<pattern name="cPat"> -c -mthumb -mcpu=cortex-m3 -DUSE_STDPERIPH_DRIVER -DSTM32F10x_CL -Os -ffunction-sections -fdata-sections -Wall -mlittle-endian -fsigned-char</pattern>
+<pattern name="asmPat"> -c -mthumb -mcpu=cortex-m3 -Wa,--warn -x assembler-with-cpp</pattern>
+
+<link script="stm32_flash.ld"> -lm -mthumb -mcpu=cortex-m3 -static -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x1000</link>
+</rcompiler>
+
