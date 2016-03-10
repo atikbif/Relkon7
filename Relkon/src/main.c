@@ -178,9 +178,9 @@ void vApplicationTickHook( void )	// вызывается каждую миллисекунду
 		case 0:
 		    ain = (double)ext_adc * 1.08;
 		    if(ain>65535) ain = 65535;
-			_EA[7-anum]=ain;
+			_EA[5-anum]=ain;
 			anum++;
-			if(anum>7) anum=0;
+			if(anum>5) anum=0;
 			adc_write_set(anum);
 			break;
 		case 1:case 2:

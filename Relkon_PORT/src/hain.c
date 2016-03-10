@@ -102,20 +102,18 @@ unsigned short get_adc(unsigned char num)
 
 void adc_write_set(unsigned char num)
 {
-	if(num>7) num=0;
+	if(num>5) num=0;
 	i2c.direction = TRANSMIT;
 	i2c.send_amount=3;
 	i2c.tx[0] = 0x01;
 	switch(num)
 	{
-		case 0:i2c.addr = 0x92;i2c.tx[1] = 0xF4;break;
-		case 1:i2c.addr = 0x92;i2c.tx[1] = 0xE4;break;
-		case 2:i2c.addr = 0x92;i2c.tx[1] = 0xD4;break;
-		case 3:i2c.addr = 0x92;i2c.tx[1] = 0xC4;break;
-		case 4:i2c.addr = 0x90;i2c.tx[1] = 0xF4;break;
-		case 5:i2c.addr = 0x90;i2c.tx[1] = 0xE4;break;
-		case 6:i2c.addr = 0x90;i2c.tx[1] = 0xD4;break;
-		case 7:i2c.addr = 0x90;i2c.tx[1] = 0xC4;break;
+		case 0:i2c.addr = 0x92;i2c.tx[1] = 0xC4;break;
+		case 1:i2c.addr = 0x92;i2c.tx[1] = 0xD4;break;
+		case 2:i2c.addr = 0x92;i2c.tx[1] = 0xE4;break;
+		case 3:i2c.addr = 0x92;i2c.tx[1] = 0xF4;break;
+		case 4:i2c.addr = 0x90;i2c.tx[1] = 0xD4;break;
+		case 5:i2c.addr = 0x90;i2c.tx[1] = 0xC4;break;
 	}
 	i2c.tx[2] = 0xD3;
 	if((GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_8)==Bit_SET) && (GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_9)==Bit_SET))
