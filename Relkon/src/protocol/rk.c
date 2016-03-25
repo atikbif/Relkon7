@@ -32,6 +32,7 @@ extern volatile unsigned char _Sys_IN[6];
 extern volatile unsigned char _Sys_OUT[6];
 extern volatile unsigned short _Sys_ADC[8];
 extern volatile unsigned short _Sys_DAC[4];
+extern volatile short _EA[8];
 
 extern mmb_ain _ADC;
 extern mmb_dac _DAC;
@@ -40,6 +41,7 @@ extern unsigned char plc[8],err[8];
 
 unsigned char TX[64];
 unsigned char RX[64];
+
 
 volatile unsigned char obj_name[20]={'0','0','1',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
 
@@ -441,7 +443,16 @@ unsigned short read_io(request* req)	//0xB0
 											case 0x02:req->tx_buf[1+tmp]=_DAC.D2[(req->addr+tmp-356)>>2] & 0xFF;break;
 											case 0x03:req->tx_buf[1+tmp]=_DAC.D2[(req->addr+tmp-356)>>2]>>8;break;
 										}
-									}else req->tx_buf[1+tmp]=0x00;
+									}else {
+										if(req->addr+tmp<500)
+										{
+											switch((req->addr+tmp-484)%2)
+											{
+												case 0x00:req->tx_buf[1+tmp]=(_EA[(req->addr+tmp-484)>>1]>0 ? (_EA[(req->addr+tmp-484)>>1]*2) : 0) & 0xFF;break;
+												case 0x01:req->tx_buf[1+tmp]=(_EA[(req->addr+tmp-484)>>1]>0 ? (_EA[(req->addr+tmp-484)>>1]*2) : 0)>>8;break;
+											}
+										}else req->tx_buf[1+tmp]=0x00;
+									}
 								}
 							}
 						}
@@ -527,6 +538,14 @@ unsigned short write_io(request* req)	//0xB1
 											case 0x03:
 											_DAC.D2[(req->addr+tmp-356)>>2]&=0x00FF;_DAC.D2[(req->addr+tmp-356)>>2]|=((unsigned short)req->rx_buf[6+tmp])<<8;break;
 										}
+									}else {
+										if(req->addr+tmp<500)
+										{
+											switch((req->addr+tmp-484)%2)
+											{
+												case 0x01:_EA[(req->addr+tmp-484)>>1] = ((((unsigned short)req->rx_buf[6+tmp])<<8) | req->rx_buf[5+tmp])>>1;break;
+											}
+										}else req->tx_buf[1+tmp]=0x00;
 									}
 								}
 							}

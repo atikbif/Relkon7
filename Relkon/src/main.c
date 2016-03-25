@@ -80,7 +80,7 @@ int main(void)
   led_init();			// инициализация светодиода, индицирующего работу процессора
   init_calendar();		// инициализация календаря
   _SPI_init();			// SPI для внешней FRAM
-  init_adc();
+  
 
   // чтение заводских установок
 
@@ -114,6 +114,8 @@ int main(void)
 
   emu_mode = _Sys.Mem.b1[5];
   if(emu_mode>2) emu_mode=0;
+  
+  if(emu_mode==0) init_adc();
 
   read_data(0x7F,0x4C,4,ip_addr);set_ip(ip_addr);
   read_data(0x7F,0x50,6,mac_addr);set_mac(mac_addr);
@@ -173,29 +175,31 @@ void vApplicationTickHook( void )	// вызывается каждую миллисекунду
 {
 	static unsigned char ext_cnt=0,anum=0;
 	double ain;
-	switch(ext_cnt)
-	{
-		case 0:
-		    ain = (double)ext_adc * 1.08;
-		    if(ain>65535) ain = 65535;
-			_EA[7-anum]=ain;
-			anum++;
-			if(anum>7) anum=0;
-			adc_write_set(anum);
-			break;
-		case 1:case 2:
-			break;
-		case 3:
-			get_ext_adc();
-			break;
-		case 4:case 5:
-			break;
-		case 6:
-			get_ext_adc();
-			break;
+	if(emu_mode==0){
+		switch(ext_cnt)
+		{
+			case 0:
+				ain = (double)ext_adc * 1.08;
+				if(ain>65535) ain = 65535;
+				_EA[7-anum]=ain;
+				anum++;
+				if(anum>7) anum=0;
+				adc_write_set(anum);
+				break;
+			case 1:case 2:
+				break;
+			case 3:
+				get_ext_adc();
+				break;
+			case 4:case 5:
+				break;
+			case 6:
+				get_ext_adc();
+				break;
+		}
+		ext_cnt++;
+		if(ext_cnt>=7) ext_cnt=0;
 	}
-	ext_cnt++;
-	if(ext_cnt>=7) ext_cnt=0;
 	_SysTmr++;tcp_tmr++;
 	if (_Sys.S4 >= S4_max) _Sys.S4 = S4_max - 1;	// ограничение номера нижней строки
 	rst_pu_toggle();	// переключение RS485 пультового канала на приём в случае отсутствия передачи данных
