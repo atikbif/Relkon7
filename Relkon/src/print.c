@@ -47,6 +47,27 @@ unsigned char print_long_buf(unsigned long val,unsigned char* ptr)
 	return (first+1);
 }
 
+unsigned char print_short_buf(short val,unsigned char* ptr)
+{
+	unsigned char length = 0;
+	if(val<0) {ptr[0]='-';val=val*(-1);length++;}
+	length += print_long_buf((unsigned long)val,ptr+1);
+	return length;
+}
+
+unsigned char print_ip_buf(unsigned char ip1, unsigned char ip2, unsigned char ip3, unsigned char ip4, unsigned char* ptr)
+{
+	unsigned char length = 0;
+	length += print_long_buf(ip1,ptr);
+	ptr[length++] = '.';
+	length += print_long_buf(ip2,&ptr[length]);
+	ptr[length++] = '.';
+	length += print_long_buf(ip3,&ptr[length]);
+	ptr[length++] = '.';
+	length += print_long_buf(ip4,&ptr[length]);
+	return length;
+}
+
 // ечать переменной типа long в буфер пульта
 void print_long(long val, unsigned char str_num,unsigned char pos,unsigned char s,unsigned char point)
 {
