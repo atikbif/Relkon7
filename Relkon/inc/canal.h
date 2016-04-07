@@ -21,6 +21,7 @@ void can_enable(unsigned char can);
 void clear_rx_cnt(unsigned char num);
 unsigned short get_rx_cnt(unsigned char num);
 void send(unsigned char can_num,unsigned char* ptr, unsigned short cnt);
+void send_str(unsigned char can_num,char* ptr);
 char search(unsigned char can_num,unsigned char* ptr);
 
 #endif

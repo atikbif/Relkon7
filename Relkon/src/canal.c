@@ -145,6 +145,13 @@ void send(unsigned char can_num,unsigned char* ptr, unsigned short cnt)
     }
 }
 
+void send_str(unsigned char can_num,char* ptr)
+{
+	unsigned short tmp = 0;
+	for(tmp=0;tmp<BUF_SIZE;tmp++) if(ptr[tmp]=='\0') break;
+	send(can_num,(unsigned char*)ptr,tmp);
+}
+
 // поиск подстроки ptr в приёмном буфере канала can_num
 char search(unsigned char can_num,unsigned char* ptr)
 {
