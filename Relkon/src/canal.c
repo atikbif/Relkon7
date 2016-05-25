@@ -56,6 +56,11 @@ portTickType PCxLastExecutionTime;
 portTickType PRxLastExecutionTime;
 portTickType PUxLastExecutionTime;
 
+// счётчики корректных запросов к контроллеру
+unsigned short rx_req_cnt_pc=0;
+unsigned short rx_req_cnt_pr=0;
+unsigned short rx_req_cnt_pu=0;
+
 /* ------------------------------------------------------------------------------ */
 /* ------------------------------------------------------------------------------ */
 /* ------------------------------------------------------------------------------ */
@@ -179,6 +184,7 @@ void PultCanTask( void *pvParameters )
 			// проверка сетевого адреса контроллер и контрольной суммы
 			if(((canalpu_rx_buf[0]==_Sys.Adr)||(canalpu_rx_buf[0]==0x00)||(canalpu_rx_buf[0]==0xFF))&&(GetCRC16((unsigned char*)canalpu_rx_buf,canalpu_rx_cnt)==0))
 			{
+				rx_req_cnt_pu++;
 				// разбор команд
 				switch(canalpu_rx_buf[1])
 				{
@@ -294,6 +300,7 @@ void BinCanTask( void *pvParameters )
 			// проверка сетевого адреса и CRC
 			if(((canal_rx_buf[0]==_Sys.Adr)||(canal_rx_buf[0]==0x00)||(canal_rx_buf[0]==0xFF))&&(GetCRC16(canal_rx_buf,canal_rx_cnt)==0))
 			{
+				rx_req_cnt_pc++;
 				// разбор команд
 				switch(canal_rx_buf[1])
 				{
@@ -423,6 +430,7 @@ void AsciiCanTask( void *pvParameters )
 		if(ascii_request)
 		{
 			ascii_request=0;
+			rx_req_cnt_pc++;
 			// разбор команды
 			switch(canal_rx_buf[1])
 			{
@@ -537,6 +545,7 @@ void BinCan2Task( void *pvParameters )
         {
             if(((canal2_rx_buf[0]==_Sys.Adr)||(canal2_rx_buf[0]==0x00)||(canal2_rx_buf[0]==0xFF))&&(GetCRC16(canal2_rx_buf,canal2_rx_cnt)==0))
             {
+				rx_req_cnt_pr++;
                 switch(canal2_rx_buf[1])
                 {
 					case 0x01:
@@ -670,6 +679,7 @@ void AsciiCan2Task( void *pvParameters )
             if(ascii_request)
             {
                 ascii_request=0;
+				rx_req_cnt_pr++;
                 // разбор команды
                 switch(canal2_rx_buf[1])
                 {

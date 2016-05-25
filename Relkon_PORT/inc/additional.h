@@ -82,4 +82,9 @@ extern unsigned char RX[64];
 
 extern unsigned short sd_err;
 
+extern unsigned short rx_req_cnt_mmb;
+extern unsigned short rx_req_cnt_pc;
+extern unsigned short rx_req_cnt_pu;
+extern unsigned short rx_req_cnt_pr;
+
 #endif
