@@ -139,11 +139,8 @@ void get_ext_adc(void)
 	{
 		I2C_ITConfig(I2C1, I2C_IT_EVT | I2C_IT_BUF , ENABLE);
 		I2C_GenerateSTART(I2C1, ENABLE);
-	}
-	else
-	{
 		i2c.err++;
-		if(i2c.err>=1000){i2c.err=0;ext_adc_init();}
+		if(i2c.err>=100){i2c.err=0;ext_adc_init();}
 	}
 }
 
@@ -272,7 +269,7 @@ void I2C1_EV_IRQHandler(void)
 
 void I2C1_ER_IRQHandler(void)
 {
-	/* Check on I2C2 AF flag and clear it */
+	/* Check on I2C1 AF flag and clear it */
 	i2c_debug++;
 	if (I2C_GetITStatus(I2C1, I2C_IT_AF))
 	{
