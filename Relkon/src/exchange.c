@@ -15,6 +15,7 @@
 extern unsigned char tx_mod_buf[MOD_BUF_SIZE];
 
 unsigned char plc[8]={0},err[8]={0};
+unsigned char exch_addr[9]={0,1,2,3,4,5,6,7,8};
 extern plc_stat _Sys;
 
 volatile unsigned char EXCHANGE=0,START_P1=0,START_P2=0,START_P3=0,START_P4=0;
@@ -40,7 +41,7 @@ void exchange_work(void)
 				exch_step++;
 				if(START_P1)
 				{
-					tx_mod_buf[0]=0x01;tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
+					tx_mod_buf[0]=exch_addr[1];tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
 					for(temp=0;temp<64;temp++) tx_mod_buf[3+temp]=TX_1[temp];
 					temp=GetCRC16(tx_mod_buf,67);tx_mod_buf[67]=temp>>8;tx_mod_buf[68]=temp&0xFF;
 					write_module(69);PLC1++;if(((PLC1%4)==0)&&(ERR1<255)) ERR1++;break;
@@ -49,7 +50,7 @@ void exchange_work(void)
 				exch_step++;
 				if(START_P2)
 				{
-					tx_mod_buf[0]=0x02;tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
+					tx_mod_buf[0]=exch_addr[2];tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
 					for(temp=0;temp<64;temp++) tx_mod_buf[3+temp]=TX_2[temp];
 					temp=GetCRC16(tx_mod_buf,67);tx_mod_buf[67]=temp>>8;tx_mod_buf[68]=temp&0xFF;
 					write_module(69);PLC2++;if(((PLC2%4)==0)&&(ERR2<255)) ERR2++;break;
@@ -58,7 +59,7 @@ void exchange_work(void)
 				exch_step++;
 				if(START_P3)
 				{
-					tx_mod_buf[0]=0x03;tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
+					tx_mod_buf[0]=exch_addr[3];tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
 					for(temp=0;temp<64;temp++) tx_mod_buf[3+temp]=TX_3[temp];
 					temp=GetCRC16(tx_mod_buf,67);tx_mod_buf[67]=temp>>8;tx_mod_buf[68]=temp&0xFF;
 					write_module(69);PLC3++;if(((PLC3%4)==0)&&(ERR3<255)) ERR3++;break;
@@ -67,7 +68,7 @@ void exchange_work(void)
 				exch_step++;
 				if(START_P4)
 				{
-					tx_mod_buf[0]=0x04;tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
+					tx_mod_buf[0]=exch_addr[4];tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
 					for(temp=0;temp<64;temp++) tx_mod_buf[3+temp]=TX_4[temp];
 					temp=GetCRC16(tx_mod_buf,67);tx_mod_buf[67]=temp>>8;tx_mod_buf[68]=temp&0xFF;
 					write_module(69);PLC4++;if(((PLC4%4)==0)&&(ERR4<255)) ERR4++;break;
@@ -76,7 +77,7 @@ void exchange_work(void)
 				exch_step++;
 				if(START_P5)
 				{
-					tx_mod_buf[0]=0x05;tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
+					tx_mod_buf[0]=exch_addr[5];tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
 					for(temp=0;temp<64;temp++) tx_mod_buf[3+temp]=TX_5[temp];
 					temp=GetCRC16(tx_mod_buf,67);tx_mod_buf[67]=temp>>8;tx_mod_buf[68]=temp&0xFF;
 					write_module(69);PLC5++;if(((PLC5%4)==0)&&(ERR5<255)) ERR5++;break;
@@ -85,7 +86,7 @@ void exchange_work(void)
 				exch_step++;
 				if(START_P6)
 				{
-					tx_mod_buf[0]=0x06;tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
+					tx_mod_buf[0]=exch_addr[6];tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
 					for(temp=0;temp<64;temp++) tx_mod_buf[3+temp]=TX_6[temp];
 					temp=GetCRC16(tx_mod_buf,67);tx_mod_buf[67]=temp>>8;tx_mod_buf[68]=temp&0xFF;
 					write_module(69);PLC6++;if(((PLC6%4)==0)&&(ERR6<255)) ERR6++;break;
@@ -94,7 +95,7 @@ void exchange_work(void)
 				exch_step++;
 				if(START_P7)
 				{
-					tx_mod_buf[0]=0x07;tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
+					tx_mod_buf[0]=exch_addr[7];tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
 					for(temp=0;temp<64;temp++) tx_mod_buf[3+temp]=TX_7[temp];
 					temp=GetCRC16(tx_mod_buf,67);tx_mod_buf[67]=temp>>8;tx_mod_buf[68]=temp&0xFF;
 					write_module(69);PLC7++;if(((PLC7%4)==0)&&(ERR7<255)) ERR7++;break;
@@ -103,7 +104,7 @@ void exchange_work(void)
 				exch_step=0;
 				if(START_P8)
 				{
-					tx_mod_buf[0]=0x08;tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
+					tx_mod_buf[0]=exch_addr[8];tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
 					for(temp=0;temp<64;temp++) tx_mod_buf[3+temp]=TX_8[temp];
 					temp=GetCRC16(tx_mod_buf,67);tx_mod_buf[67]=temp>>8;tx_mod_buf[68]=temp&0xFF;
 					write_module(69);PLC8++;if(((PLC8%4)==0)&&(ERR8<255)) ERR8++;break;
@@ -111,7 +112,7 @@ void exchange_work(void)
 				exch_step++;
 				if(START_P1)
 				{
-					tx_mod_buf[0]=0x01;tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
+					tx_mod_buf[0]=exch_addr[1];tx_mod_buf[1]=0xE5;tx_mod_buf[2]=_Sys.Adr;
 					for(temp=0;temp<64;temp++) tx_mod_buf[3+temp]=TX_1[temp];
 					temp=GetCRC16(tx_mod_buf,67);tx_mod_buf[67]=temp>>8;tx_mod_buf[68]=temp&0xFF;
 					write_module(69);PLC1++;if(((PLC1%4)==0)&&(ERR1<255)) ERR1++;
@@ -126,7 +127,11 @@ void exchange_work(void)
 void exch_answer(request* req)
 {
 	unsigned char temp;
-	switch(req->addr)
+	unsigned char plcNum=0;
+	for(temp=0;temp<8;temp++) {
+		if(req->addr == exch_addr[temp+1]) {plcNum = temp+1;break;}
+	}
+	switch(plcNum)
 	{
 		case 1:for(temp=0;temp<64;temp++) RX_1[temp]=req->rx_buf[3+temp];PLC1=0;ERR1=0;break;
 		case 2:for(temp=0;temp<64;temp++) RX_2[temp]=req->rx_buf[3+temp];PLC2=0;ERR2=0;break;
@@ -137,5 +142,10 @@ void exch_answer(request* req)
 		case 7:for(temp=0;temp<64;temp++) RX_7[temp]=req->rx_buf[3+temp];PLC7=0;ERR7=0;break;
 		case 8:for(temp=0;temp<64;temp++) RX_8[temp]=req->rx_buf[3+temp];PLC8=0;ERR8=0;break;
 	}
+}
+
+void set_exchange_net_addr(unsigned char plcNum, unsigned char netAddr)
+{
+	if((plcNum>=1)&&(plcNum<9)&&(netAddr>0)) exch_addr[plcNum] = netAddr;
 }
 
