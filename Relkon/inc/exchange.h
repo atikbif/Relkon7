@@ -20,3 +20,4 @@
 
 void exchange_work(void);
 void exch_answer(request* req);
+void set_exchange_net_addr(unsigned char plcNum, unsigned char netAddr);
