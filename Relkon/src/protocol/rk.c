@@ -37,6 +37,7 @@ extern mmb_ain _ADC;
 extern mmb_dac _DAC;
 
 extern unsigned char plc[8],err[8];
+extern unsigned char exch_addr[9];
 
 unsigned char TX[64];
 unsigned char RX[64];
@@ -546,11 +547,15 @@ unsigned short write_io(request* req)	//0xB1
 
 unsigned short exchange_cmd(request* req)
 {
-	unsigned short tmp;
-	if((req->rx_buf[2])&&(req->rx_buf[2]<9))
+	unsigned short tmp=0;
+	unsigned char plcNum=0;
+	for(tmp=0;tmp<8;tmp++) {
+		if(req->rx_buf[2]==exch_addr[tmp+1]) {plcNum=tmp+1;break;}
+	}
+	if(plcNum)
 	{
 		for(tmp=0;tmp<64;tmp++) RX[tmp]=req->rx_buf[3+tmp];
-		plc[req->rx_buf[2]-1]=0;err[req->rx_buf[2]-1]=0;
+		plc[plcNum-1]=0;err[plcNum-1]=0;
 		req->tx_buf[0]=req->rx_buf[2];
 		req->tx_buf[1]=0xE5;
 		req->tx_buf[2]=_Sys.Adr;
