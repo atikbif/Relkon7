@@ -109,6 +109,12 @@ unsigned char check_arp_answer_gate(arp_pkt* pkt)
 	return res;
 }
 
+unsigned char check_arp_answer(arp_pkt* pkt)
+{
+	if((pkt->oper[0]==0x00)&&(pkt->oper[1]==0x02))	{return 1;}
+	return 0;
+}
+
 void send_arp(arp_pkt* pkt)
 {
 	unsigned char* ptr;
