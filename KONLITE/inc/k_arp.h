@@ -26,6 +26,7 @@ void add_arp_tab(unsigned char* ip_tab,unsigned char* mac_tab);
 arp_pkt* arp_rcv(mac_pkt* pkt);
 unsigned char check_arp_req(arp_pkt* pkt);
 unsigned char check_arp_answer_gate(arp_pkt* pkt);
+unsigned char check_arp_answer(arp_pkt* pkt);
 void send_arp(arp_pkt* pkt);
 void arp_answer(arp_pkt* pkt);
 void get_gate_mac(void);

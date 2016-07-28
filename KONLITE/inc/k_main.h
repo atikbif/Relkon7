@@ -8,7 +8,7 @@
 #ifndef K_MAIN_H_
 #define K_MAIN_H_
 
-#define GATE_PER 		(5000)
+#define GATE_PER 		(50000)
 
 void konlite_call(void);
 

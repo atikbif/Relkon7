@@ -108,7 +108,49 @@ void send_ip(ip_pkt* pkt)
 		tmp = 20 + pkt->buf.len;
 		ptr[16]=tmp>>8;ptr[17]=tmp&0xFF;
 		//ptr[18]=pkt->id[0];ptr[19]=pkt->id[1];
-		ptr[18]=ip_id>>8;ptr[19]=ip_id&0xFF;ip_id++;
+		pkt->id[0]=ptr[18]=ip_id>>8;pkt->id[1]=ptr[19]=ip_id&0xFF;ip_id++;
+		
+		ptr[20]=0x00;//0x40;
+		ptr[21]=0x00;
+		ptr[22]=0x40;//0x80;
+		ptr[23]=pkt->pr;
+		ptr[24]=0x00;ptr[25]=0x00;
+		get_ip(ip);
+		for(tmp=0;tmp<4;tmp++)
+		{
+			ptr[26+tmp]=ip[tmp];
+			ptr[30+tmp]=pkt->ip_d[tmp];
+		}
+		for(tmp=0;tmp<pkt->buf.len;tmp++) ptr[34+tmp] = pkt->buf.ptr[tmp];
+		send_mac_data(14+20+pkt->buf.len);
+	}
+}
+
+void send_ip_without_id_increment(ip_pkt* pkt)
+{
+	unsigned char* ptr;
+	unsigned char* m;
+	unsigned short tmp;
+	if(gate_fl==0) {m = get_mac_tab(&pkt->ip_d[0]);} // поиск мак адреса в таблице
+	else {m = get_gate_ptr();} // используется мак шлюза
+	if(m)//(m)&&(m[0]))
+	{
+		//eth_pkt_cnt++;
+		ptr = get_mac_tx();
+		get_mac(mac);
+		for(tmp=0;tmp<6;tmp++)
+		{
+			ptr[tmp]=m[tmp];
+			ptr[tmp+6]=mac[tmp];
+		}
+		ptr[12]=0x08;ptr[13]=0x00;
+		ptr[14]=0x45;
+		ptr[15]=0x00;
+		tmp = 20 + pkt->buf.len;
+		ptr[16]=tmp>>8;ptr[17]=tmp&0xFF;
+		ptr[18]=pkt->id[0];ptr[19]=pkt->id[1];
+		//pkt->id[0]=ptr[18]=ip_id>>8;pkt->id[1]=ptr[19]=ip_id&0xFF;ip_id++;
+		
 		ptr[20]=0x00;//0x40;
 		ptr[21]=0x00;
 		ptr[22]=0x40;//0x80;
@@ -150,4 +192,13 @@ unsigned char check_mask(unsigned char* ips)
 		if((ip[tmp] & mask[tmp]) != (ips[tmp] & mask[tmp])) {res=0;break;}
 	}
 	return res;
+}
+void set_id(unsigned short value)
+{
+	ip_id = value;
+}
+
+unsigned short get_id(void)
+{
+	return ip_id;
 }

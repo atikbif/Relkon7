@@ -28,6 +28,7 @@
 
 #include "fat_filelib.h"
 #include <stdlib.h>
+#include "k_udp_master.h"
 
 #define key	_SysKey
 
