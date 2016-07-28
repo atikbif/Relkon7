@@ -38,6 +38,7 @@
 <source pattern="cPat" out="k_main.o">k_main.c</source>
 <source pattern="cPat" out="k_tcp.o">k_tcp.c</source>
 <source pattern="cPat" out="k_udp.o">k_udp.c</source>
+<source pattern="cPat" out="k_udp_master.o">k_udp_master.c</source>
 <source pattern="cPat" out="lcd.o">lcd.c</source>
 <source pattern="cPat" out="list.o">list.c</source>
 <source pattern="cPat" out="main.o">main.c</source>

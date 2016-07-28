@@ -26,5 +26,6 @@ unsigned char udp_listen(unsigned short port, void (*func)(udp_pkt* pkt1,ip_pkt*
 void portudp_scan(udp_pkt* pkt1, ip_pkt* pkt2);
 void udp_answer_head(udp_pkt* pkt1,ip_pkt* pkt2);
 void send_udp(udp_pkt* pkt1,ip_pkt* pkt2);
+void send_udp_to_buf(udp_pkt* pkt1,ip_pkt* pkt2);
 
 #endif /* K_UDP_H_ */

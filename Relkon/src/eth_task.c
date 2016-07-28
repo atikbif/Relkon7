@@ -21,6 +21,7 @@
 #include "main.h"
 #include "crc.h"
 #include "FreeRTOS.h"
+#include "k_udp_master.h"
 
 unsigned char eth_test;
 unsigned char eth_stat=0;
@@ -137,71 +138,84 @@ void tcp_modbus(tcp_pkt* pkt1,ip_pkt* pkt2)
 // pkt1 и pkt2 - структуры, описывающие принятые заголовки udp и ip
 void udp_protocol(udp_pkt* pkt1,ip_pkt* pkt2)
 {
+	unsigned short tmp;
 	ethPktCnt++;
-	udp_answer_head(pkt1,pkt2);	// преобразование заголовков на случай вероятного ответа
-	req_udp.tx_buf = pkt1->buf.ptr; req_udp.rx_buf = pkt1->buf.ptr;
-	req_udp.mode = BIN_MODE;req_udp.can_name = CAN_UDP;
-	// проверка сетевого адреса и CRC
-	//if(((pkt1->buf.ptr[0]==_Sys.Adr)||(pkt1->buf.ptr[0]==0x00))&&(GetCRC16(pkt1->buf.ptr,pkt1->buf.len)==0))
-	{
-		pkt1->buf.len=0;
-		// разбор команды
-		switch(pkt1->buf.ptr[1])
-		{
-			case 0xA0:pkt1->buf.len=get_software_ver(&req_udp);break;
-			case 0xA1:pkt1->buf.len=get_hardware_ver(&req_udp);break;
-			case 0xA2:pkt1->buf.len=get_can_name(&req_udp);break;
-			case 0xB0:
-				req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
-				req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
-				pkt1->buf.len = read_io(&req_udp);break;
-			case 0xB1:
-				req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
-				req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
-				pkt1->buf.len = write_io(&req_udp);break;
-			case 0xD0:
-				req_udp.addr = pkt1->buf.ptr[2];req_udp.cnt = pkt1->buf.ptr[3];
-				pkt1->buf.len=read_mem(&req_udp);break;
-			case 0xD1:
-				req_udp.addr=pkt1->buf.ptr[2];req_udp.cnt=pkt1->buf.ptr[3];
-				pkt1->buf.len=read_time(&req_udp);break;
-			case 0xD3:
-				req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
-				req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
-				pkt1->buf.len = read_frmem(&req_udp);break;
-			case 0xD4:
-				req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
-				req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
-				pkt1->buf.len = read_ram(&req_udp);break;
-			case 0xD5:
-				req_udp.laddr=((unsigned long)pkt1->buf.ptr[2]<<24) | ((unsigned long)pkt1->buf.ptr[3]<<16) | ((unsigned long)pkt1->buf.ptr[4]<<8) |pkt1->buf.ptr[5];
-				req_udp.cnt=((unsigned int)pkt1->buf.ptr[6]<<8) | pkt1->buf.ptr[7];
-				pkt1->buf.len = read_flash(&req_udp);break;
-			case 0xD6:
-				req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
-				req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
-				pkt1->buf.len = read_preset(&req_udp);break;
-			case 0xE0:
-				req_udp.addr=pkt1->buf.ptr[2];req_udp.cnt=pkt1->buf.ptr[3];
-				pkt1->buf.len = write_mem(&req_udp);break;
-			case 0xE1:
-				req_udp.addr=pkt1->buf.ptr[2];req_udp.cnt=pkt1->buf.ptr[3];
-				pkt1->buf.len=write_time(&req_udp);break;
-			case 0xE3:
-				req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
-				req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
-				pkt1->buf.len=write_frmem(&req_udp);break;
-			case 0xE4:
-				req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
-				req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
-				pkt1->buf.len=write_ram(&req_udp);break;
-			case 0xE6:
-				req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
-				req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
-				pkt1->buf.len=write_preset(&req_udp);break;
-			case 0xFE:reset_cmd();break;
+	
+	udp_request *r = get_req_by_id((((unsigned short)(pkt2->id[0]))<<8) | pkt2->id[1]);
+	if(r!=0) {
+		r->result = UDP_CORRECT_ANSWER;
+		if((r->cmd==UDP_RD_USER)&&(r->rx!=0)) {
+			for(tmp=0;tmp<((r->cnt)&0xFF);tmp++) {
+				r->rx[tmp] = pkt1->buf.ptr[tmp+1];
+			}
 		}
-		if(pkt1->buf.len) {send_udp(pkt1,pkt2);}
+	}else {
+		set_id((((unsigned short)pkt2->id[0])<<8) | pkt2->id[1]);
+		udp_answer_head(pkt1,pkt2);	// преобразование заголовков на случай вероятного ответа
+		req_udp.tx_buf = pkt1->buf.ptr; req_udp.rx_buf = pkt1->buf.ptr;
+		req_udp.mode = BIN_MODE;req_udp.can_name = CAN_UDP;
+		// проверка сетевого адреса и CRC
+		//if(((pkt1->buf.ptr[0]==_Sys.Adr)||(pkt1->buf.ptr[0]==0x00))&&(GetCRC16(pkt1->buf.ptr,pkt1->buf.len)==0))
+		{
+			pkt1->buf.len=0;
+			// разбор команды
+			switch(pkt1->buf.ptr[1])
+			{
+				case 0xA0:pkt1->buf.len=get_software_ver(&req_udp);break;
+				case 0xA1:pkt1->buf.len=get_hardware_ver(&req_udp);break;
+				case 0xA2:pkt1->buf.len=get_can_name(&req_udp);break;
+				case 0xB0:
+					req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
+					req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
+					pkt1->buf.len = read_io(&req_udp);break;
+				case 0xB1:
+					req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
+					req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
+					pkt1->buf.len = write_io(&req_udp);break;
+				case 0xD0:
+					req_udp.addr = pkt1->buf.ptr[2];req_udp.cnt = pkt1->buf.ptr[3];
+					pkt1->buf.len=read_mem(&req_udp);break;
+				case 0xD1:
+					req_udp.addr=pkt1->buf.ptr[2];req_udp.cnt=pkt1->buf.ptr[3];
+					pkt1->buf.len=read_time(&req_udp);break;
+				case 0xD3:
+					req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
+					req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
+					pkt1->buf.len = read_frmem(&req_udp);break;
+				case 0xD4:
+					req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
+					req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
+					pkt1->buf.len = read_ram(&req_udp);break;
+				case 0xD5:
+					req_udp.laddr=((unsigned long)pkt1->buf.ptr[2]<<24) | ((unsigned long)pkt1->buf.ptr[3]<<16) | ((unsigned long)pkt1->buf.ptr[4]<<8) |pkt1->buf.ptr[5];
+					req_udp.cnt=((unsigned int)pkt1->buf.ptr[6]<<8) | pkt1->buf.ptr[7];
+					pkt1->buf.len = read_flash(&req_udp);break;
+				case 0xD6:
+					req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
+					req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
+					pkt1->buf.len = read_preset(&req_udp);break;
+				case 0xE0:
+					req_udp.addr=pkt1->buf.ptr[2];req_udp.cnt=pkt1->buf.ptr[3];
+					pkt1->buf.len = write_mem(&req_udp);break;
+				case 0xE1:
+					req_udp.addr=pkt1->buf.ptr[2];req_udp.cnt=pkt1->buf.ptr[3];
+					pkt1->buf.len=write_time(&req_udp);break;
+				case 0xE3:
+					req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
+					req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
+					pkt1->buf.len=write_frmem(&req_udp);break;
+				case 0xE4:
+					req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
+					req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
+					pkt1->buf.len=write_ram(&req_udp);break;
+				case 0xE6:
+					req_udp.addr=((unsigned short)pkt1->buf.ptr[2]<<8) | pkt1->buf.ptr[3];
+					req_udp.cnt=((unsigned short)pkt1->buf.ptr[4]<<8) | pkt1->buf.ptr[5];
+					pkt1->buf.len=write_preset(&req_udp);break;
+				case 0xFE:reset_cmd();break;
+			}
+			if(pkt1->buf.len) {send_udp(pkt1,pkt2);}
+		}
 	}
 }
 

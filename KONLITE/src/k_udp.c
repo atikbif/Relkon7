@@ -6,6 +6,7 @@
  */
 
 #include "k_udp.h"
+#include "k_udp_master.h"
 
 static struct
 {
@@ -26,6 +27,7 @@ void udp_init(void)
 		udp_tab[tmp].port=12144;
 		udp_tab[tmp].stat = 0;
 	}
+	id_list_init();
 }
 
 udp_pkt* udp_rcv(ip_pkt* pkt)
@@ -78,6 +80,7 @@ void udp_answer_head(udp_pkt* pkt1,ip_pkt* pkt2)
 	p_h = pkt1->p_s[0];p_l = pkt1->p_s[1];
 	pkt1->p_s[0]=pkt1->p_d[0];pkt1->p_s[1]=pkt1->p_d[1];
 	pkt1->p_d[0] = p_h; pkt1->p_d[1] = p_l;
+	
 }
 
 void send_udp(udp_pkt* pkt1,ip_pkt* pkt2)
@@ -95,4 +98,20 @@ void send_udp(udp_pkt* pkt1,ip_pkt* pkt2)
 	pkt2->buf.ptr[7]=0;
 	for(tmp=0;tmp<pkt1->buf.len;tmp++) pkt2->buf.ptr[8+tmp]=pkt1->buf.ptr[tmp];
 	send_ip(pkt2);
+}
+
+void send_udp_to_buf(udp_pkt* pkt1,ip_pkt* pkt2)
+{
+	unsigned short tmp;
+	pkt2->buf.len = pkt1->buf.len+8;
+	pkt2->pr = 0x11;
+	pkt2->buf.ptr[0]=pkt1->p_s[0];
+	pkt2->buf.ptr[1]=pkt1->p_s[1];
+	pkt2->buf.ptr[2]=pkt1->p_d[0];
+	pkt2->buf.ptr[3]=pkt1->p_d[1];
+	pkt2->buf.ptr[4]=(pkt1->buf.len+8) >> 8;
+	pkt2->buf.ptr[5]=(pkt1->buf.len+8) & 0xFF;
+	pkt2->buf.ptr[6]=0;
+	pkt2->buf.ptr[7]=0;
+	for(tmp=0;tmp<pkt1->buf.len;tmp++) pkt2->buf.ptr[8+tmp]=pkt1->buf.ptr[tmp];
 }
