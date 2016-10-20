@@ -6,6 +6,8 @@ inline void baud_19200(void);
 void write_module(unsigned short count);
 void dio_conf(void);
 void init_mb_canal(void);
+void clear_mb_toggle_pin();
+char get_mb_toggle_pin_state();
 unsigned char read_din(unsigned char num);
 void dout_settings(void);
 void din_settings(void);

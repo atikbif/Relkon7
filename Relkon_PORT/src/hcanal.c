@@ -417,3 +417,27 @@ void DMA2_Channel5_IRQHandler(void)
 		USART_ITConfig(UART4, USART_IT_TC, ENABLE);
 	}
 }
+
+void clear_pc_toggle_pin()
+{
+	GPIO_WriteBit(GPIOD, GPIO_Pin_0, Bit_RESET);
+	USART_ITConfig(USART2, USART_IT_TC, DISABLE);
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+}
+
+char get_pc_toggle_pin_state()
+{
+	return GPIO_ReadOutputDataBit(GPIOD, GPIO_Pin_0);
+}
+
+void clear_pr_toggle_pin()
+{
+	GPIO_WriteBit(GPIOD, GPIO_Pin_7, Bit_RESET);
+	USART_ITConfig(UART4, USART_IT_TC, DISABLE);
+	USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
+}
+
+char get_pr_toggle_pin_state()
+{
+	return GPIO_ReadOutputDataBit(GPIOD, GPIO_Pin_7);
+}

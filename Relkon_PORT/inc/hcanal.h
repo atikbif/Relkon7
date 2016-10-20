@@ -11,3 +11,7 @@ void prog_message_bin(void);
 void prog_message_ascii(void);
 unsigned long get_pc_tmr(void);
 unsigned long get_pr_tmr(void);
+void clear_pc_toggle_pin();
+char get_pc_toggle_pin_state();
+void clear_pr_toggle_pin();
+char get_pr_toggle_pin_state();
