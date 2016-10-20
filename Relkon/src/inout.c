@@ -36,6 +36,7 @@ extern unsigned char RX[64];
 extern unsigned char plc[8],err[8];
 extern plc_stat _Sys;
 volatile unsigned char prot_enable=1;
+volatile unsigned short tx_mb_tmr = 0;
 request req_mb;
 
 unsigned short rx_req_cnt_mmb=0;
@@ -204,5 +205,8 @@ void InOutTask( void *pvParameters )
 			}
 		}
 		vTaskDelayUntil( &MBxLastExecutionTime, InOut_DELAY );
+		// проверка сбоя при переключении RS485 на приём
+		if(get_mb_toggle_pin_state()) tx_mb_tmr++;else tx_mb_tmr=0;
+		if(tx_mb_tmr>=1000) clear_mb_toggle_pin();
 	}
 }

@@ -61,6 +61,9 @@ unsigned short rx_req_cnt_pc=0;
 unsigned short rx_req_cnt_pr=0;
 unsigned short rx_req_cnt_pu=0;
 
+volatile unsigned short tx_pc_tmr = 0;
+volatile unsigned short tx_pr_tmr = 0;
+
 /* ------------------------------------------------------------------------------ */
 /* ------------------------------------------------------------------------------ */
 /* ------------------------------------------------------------------------------ */
@@ -399,6 +402,9 @@ void BinCanTask( void *pvParameters )
 			canal_rx_cnt=0;
 		}
 		vTaskDelayUntil( &PCxLastExecutionTime, CANAL_DELAY );
+		// проверка сбоя при переключении RS485 на приём
+		if(get_pc_toggle_pin_state()) tx_pc_tmr++;else tx_pc_tmr=0;
+		if(tx_pc_tmr>=1000) clear_pc_toggle_pin();
 	}
 }
 
@@ -525,7 +531,10 @@ void AsciiCanTask( void *pvParameters )
 			mstr1=0;
 			canal_rx_cnt=0;
 		}
-	vTaskDelayUntil( &PCxLastExecutionTime, CANAL_DELAY );
+		vTaskDelayUntil( &PCxLastExecutionTime, CANAL_DELAY );
+		// проверка сбоя при переключении RS485 на приём
+		if(get_pc_toggle_pin_state()) tx_pc_tmr++;else tx_pc_tmr=0;
+		if(tx_pc_tmr>=1000) clear_pc_toggle_pin();
 	}
 }
 
@@ -644,6 +653,9 @@ void BinCan2Task( void *pvParameters )
             mstr2=0;
         }
         vTaskDelayUntil( &PRxLastExecutionTime, CANAL_DELAY );
+		// проверка сбоя при переключении RS485 на приём
+		if(get_pr_toggle_pin_state()) tx_pr_tmr++;else tx_pr_tmr=0;
+		if(tx_pr_tmr>=1000) clear_pr_toggle_pin();
     }
 }
 
@@ -774,7 +786,10 @@ void AsciiCan2Task( void *pvParameters )
                 mstr2=0;
                 canal2_rx_cnt=0;
             }
-        vTaskDelayUntil( &PRxLastExecutionTime, CANAL_DELAY );
+		vTaskDelayUntil( &PRxLastExecutionTime, CANAL_DELAY );
+		// проверка сбоя при переключении RS485 на приём
+		if(get_pr_toggle_pin_state()) tx_pr_tmr++;else tx_pr_tmr=0;
+		if(tx_pr_tmr>=1000) clear_pr_toggle_pin();
     }
 }
 

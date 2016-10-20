@@ -320,6 +320,19 @@ static void set_output(unsigned char dt)
     if(dt&0x01) GPIO_WriteBit(GPIOC,GPIO_Pin_6,Bit_RESET); else GPIO_WriteBit(GPIOC,GPIO_Pin_6,Bit_SET);
 }
 
+char get_mb_toggle_pin_state()
+{
+	return GPIO_ReadOutputDataBit(GPIOE, GPIO_Pin_0);
+}
+
+void clear_mb_toggle_pin()
+{
+	GPIO_WriteBit(GPIOE, GPIO_Pin_0, Bit_RESET);
+	USART_ITConfig(USART1, USART_IT_TC, DISABLE);
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+	if(((mod_table[0])&&(emu_mode!=2))||(EXCHANGE)) {Tx_end++;TIM4->CNT=0;rx_mod_cnt=0;}
+}
+
 void USART1_IRQHandler(void)
 {
     if(USART_GetITStatus(USART1, USART_IT_TC) != RESET)
