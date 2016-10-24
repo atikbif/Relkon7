@@ -55,6 +55,48 @@ unsigned char print_short_buf(short val,unsigned char* ptr)
 	return length;
 }
 
+void print_sms_var(short value, unsigned char *sms_buf, unsigned char width, unsigned char point_pos)
+{
+	unsigned char i = 0;
+	unsigned char n10=0,n100=0,n1000=0,n10000=0;
+	unsigned char length = 0;
+	unsigned char dig_count = 0;
+	for(i=0;i<width;++i) {sms_buf[i]=' ';}
+	i=0;
+	if(value<0) {
+		if(width) sms_buf[i]='-';else return;
+		value=value*(-1);
+		length++;
+		sms_buf++;
+	}
+	while(value>=10000){value-=10000;n10000++;}
+	while(value>=1000){value-=1000;n1000++;}
+	while(value>=100){value-=100;n100++;}
+	while(value>=10){value-=10;n10++;}
+	if(n10000) dig_count=5;
+	else if(n1000) dig_count=4;
+	else if(n100) dig_count=3;
+	else if(n10) dig_count=2;
+	else dig_count=1;
+	if(point_pos) {length++;sms_buf++;}
+	length+=dig_count;
+	if(length>width) return;
+	i=0;length = 0;
+	sms_buf[dig_count-1] = value+'0';i++;length++;
+	if(length>=dig_count) return;
+	if(i==point_pos) {sms_buf[dig_count-1-i]='.';i++;}
+	sms_buf[dig_count-1-i] = n10+'0';i++;length++;
+	if(length>=dig_count) return;
+	if(i==point_pos) {sms_buf[dig_count-1-i]='.';i++;}
+	sms_buf[dig_count-1-i] = n100+'0';i++;length++;
+	if(length>=dig_count) return;
+	if(i==point_pos) {sms_buf[dig_count-1-i]='.';i++;}
+	sms_buf[dig_count-1-i] = n1000+'0';i++;length++;
+	if(length>=dig_count) return;
+	if(i==point_pos) {sms_buf[dig_count-1-i]='.';i++;}
+	sms_buf[dig_count-1-i] = n10000+'0';i++;length++;
+}
+
 unsigned char print_ip_buf(unsigned char ip1, unsigned char ip2, unsigned char ip3, unsigned char ip4, unsigned char* ptr)
 {
 	unsigned char length = 0;
