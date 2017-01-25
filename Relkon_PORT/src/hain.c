@@ -97,7 +97,7 @@ void init_adc()
 
 unsigned short get_adc(unsigned char num)
 {
-    return (((unsigned long)adc_data[num]*125)/127);
+    return (unsigned long)adc_data[num];
 }
 
 void adc_write_set(unsigned char num)
