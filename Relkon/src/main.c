@@ -181,9 +181,12 @@ void vApplicationTickHook( void )	// вызывается каждую миллисекунду
 		switch(ext_cnt)
 		{
 			case 0:
-				ain = (double)ext_adc * 1.08;
-				if(ain>65535) ain = 65535;
-				_EA[7-anum]=ain;
+				if(ext_adc<0) _EA[7-anum]=0;
+				else {
+					ain = (double)ext_adc * 1.08;
+					if(ain>=32767) _EA[7-anum]=32767;
+					else _EA[7-anum]=ain;
+				}
 				anum++;
 				if(anum>7) anum=0;
 				adc_write_set(anum);
@@ -243,7 +246,7 @@ static void prvFlashTask( void *pvParameters )
     	if(emu_mode==0){
 			for(tmp=0;tmp<8;tmp++) {
 				cur_adc = get_adc(tmp);
-				if(adc_sum[tmp]==0) {adc_min[tmp]=adc_max[tmp]=cur_adc;}
+				if(s_tmr % 8 == 0) {adc_min[tmp]=adc_max[tmp]=cur_adc;}
 				adc_sum[tmp]+=cur_adc;
 				if(cur_adc<adc_min[tmp]) adc_min[tmp] = cur_adc;
 				if(cur_adc>adc_max[tmp]) adc_max[tmp] = cur_adc;
