@@ -82,6 +82,7 @@ int main(void)
   led_init();			// инициализация светодиода, индицирующего работу процессора
   init_calendar();		// инициализация календаря
   _SPI_init();			// SPI для внешней FRAM
+  
 
   // чтение заводских установок
 
@@ -115,6 +116,7 @@ int main(void)
 
   emu_mode = _Sys.Mem.b1[5];
   if(emu_mode>2) emu_mode=0;
+  
   if(emu_mode==0) init_adc();
 
   read_data(0x7F,0x4C,4,ip_addr);set_ip(ip_addr);
@@ -179,9 +181,12 @@ void vApplicationTickHook( void )	// вызывается каждую миллисекунду
 		switch(ext_cnt)
 		{
 			case 0:
-				ain = (double)ext_adc * 1.08;
-				if(ain>65535) ain = 65535;
-				_EA[5-anum]=ain;
+				if(ext_adc<0) _EA[5-anum]=0;
+				else {
+					ain = (double)ext_adc * 1.08;
+					if(ain>=32767) _EA[5-anum]=32767;
+					else _EA[5-anum]=ain;
+				}
 				anum++;
 				if(anum>5) anum=0;
 				adc_write_set(anum);
@@ -241,7 +246,7 @@ static void prvFlashTask( void *pvParameters )
     	if(emu_mode==0){
 			for(tmp=0;tmp<8;tmp++) {
 				cur_adc = get_adc(tmp);
-				if(adc_sum[tmp]==0) {adc_min[tmp]=adc_max[tmp]=cur_adc;}
+				if(s_tmr % 8 == 0) {adc_min[tmp]=adc_max[tmp]=cur_adc;}
 				adc_sum[tmp]+=cur_adc;
 				if(cur_adc<adc_min[tmp]) adc_min[tmp] = cur_adc;
 				if(cur_adc>adc_max[tmp]) adc_max[tmp] = cur_adc;
