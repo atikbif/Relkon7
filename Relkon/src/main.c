@@ -55,6 +55,8 @@ extern volatile unsigned short pu_tmr;
 extern const unsigned short S4_max;					// максимально допустимый номер нижней строки
 extern volatile unsigned long tcp_tmr;
 
+volatile float adc_coeff = 125.0/127;
+
 static void prvFlashTask( void *pvParameters );
 
 portTickType FLLastExecutionTime;
@@ -214,7 +216,11 @@ void vApplicationIdleHook(void)	// вызывается в промежутках ожидания задач
 // вспомогательная служебная задача
 static void prvFlashTask( void *pvParameters )
 {
-    static unsigned long s_tmr=0;
+    static unsigned short s_tmr=0;
+	static float adc_res = 0;
+	static unsigned short adc_max[8];
+	static unsigned short adc_min[8];
+	static unsigned short cur_adc = 0;
 
     unsigned char tmp;
     init_adc();init_dac();		// инициализация ацп и цап
@@ -224,9 +230,24 @@ static void prvFlashTask( void *pvParameters )
 	{
 
     	// фильтр АЦП
-    	if(emu_mode==0){for(tmp=0;tmp<8;tmp++) adc_sum[tmp]+=get_adc(tmp);
-        if(s_tmr % 16 == 0) for(tmp=0;tmp<8;tmp++) {_Sys_ADC[tmp]=adc_sum[tmp];adc_sum[tmp]=0;}}
-    	s_tmr++;
+    	if(emu_mode==0){
+			for(tmp=0;tmp<8;tmp++) {
+				cur_adc = get_adc(tmp);
+				if(s_tmr % 8 == 0) {adc_min[tmp]=adc_max[tmp]=cur_adc;}
+				adc_sum[tmp]+=cur_adc;
+				if(cur_adc<adc_min[tmp]) adc_min[tmp] = cur_adc;
+				if(cur_adc>adc_max[tmp]) adc_max[tmp] = cur_adc;
+			}
+			s_tmr++;
+			if(s_tmr % 8 == 0) {
+				for(tmp=0;tmp<8;tmp++) {
+					adc_res=(adc_sum[tmp]-adc_min[tmp]-adc_max[tmp])*16.0/(8-2)*adc_coeff+0.5;
+					adc_sum[tmp]=0;
+					if(adc_res>65535) adc_res=65535;_Sys_ADC[tmp]=adc_res;
+				}
+			}
+		}
+    	
     	if((s_tmr%64)==0) {get_time();toggle_led();}	// обновление текущего времени и мигание светодиода
         vTaskDelayUntil( &FLLastExecutionTime, mainFLASH_DELAY );
 	}
