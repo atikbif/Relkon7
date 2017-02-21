@@ -13,6 +13,21 @@ typedef struct{
     unsigned int D2[32];
 }mmb_dac;//_DAC;
 
+typedef struct {
+	unsigned short start_byte_num;
+	char bit_offset;
+	unsigned short *ptr;
+}mvar;
+
+typedef struct {
+	const char *request;
+	unsigned short req_length;
+	unsigned short answer_length;
+	const mvar *vars_ptr;
+	unsigned short var_cnt;
+	unsigned char wr_flag;
+}mvar_reqs;
+
 void mmb_work(void);
 
 #endif /* MMB_H_ */
