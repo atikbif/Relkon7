@@ -546,6 +546,12 @@ char can_check(request* r)
 				if(GetCRC16(rx_buf,3+r->amount*2+2)==0)	{r->rx = &rx_buf[3];return 1;}
 			}
 			break;
+		case WR_HLD:
+			if(get_rx_cnt(r->canal)==8)
+			{
+				if(GetCRC16(rx_buf,8)==0)	{return 1;}
+			}
+			break;
 		case RD_INP:
 			if(get_rx_cnt(r->canal)==3+r->amount*2+2)
 			{
