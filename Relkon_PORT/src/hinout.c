@@ -18,6 +18,7 @@ extern volatile unsigned char prot_enable;
 extern volatile unsigned char EXCHANGE;
 
 extern const unsigned char mod_table[];
+extern const unsigned short mb_req_count;
 
 static unsigned char get_input(void);
 static void set_output(unsigned char dt);
@@ -199,7 +200,7 @@ void init_mb_canal(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOE, &GPIO_InitStructure);
 
-	if((mod_table[0])&&(emu_mode!=2)){USART_InitStructure.USART_StopBits = USART_StopBits_2;}
+	if((mod_table[0])&&(emu_mode!=2)&&(mb_req_count==0)){USART_InitStructure.USART_StopBits = USART_StopBits_2;}
 	else{USART_InitStructure.USART_StopBits = USART_StopBits_1;}
 	USART_InitStructure.USART_BaudRate = 115200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
