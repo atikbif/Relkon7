@@ -11,5 +11,6 @@ void InOutTask( void *pvParameters );
 unsigned char get_input(void);
 void set_output(unsigned char dt);
 void write_module(unsigned short count);
+void mb_modbus(void);
 
 #endif

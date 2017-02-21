@@ -38,6 +38,7 @@ mmb_dac _DAC;
 static volatile unsigned short temp,base=0,rx_base,rx_pos;
 extern volatile unsigned char Tx_end;
 
+
 void mmb_work(void)
 {
 	switch(step)

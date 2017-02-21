@@ -43,6 +43,72 @@ unsigned short rx_req_cnt_mmb=0;
 
 portTickType MBxLastExecutionTime;
 
+extern const unsigned short mb_req_count;
+extern const unsigned short modbus_delay;
+extern const mvar_reqs mb_mvar_reqs[];
+extern volatile unsigned char err_mod[256];
+
+void mb_modbus(void)
+{
+	static unsigned char mb_cnt = 0;
+	static unsigned short mb_tmp = 0;
+	static unsigned short mb_tmp2 = 0;
+	static unsigned short mb_delay = 0;
+	static unsigned short mb_value = 0;
+	static const mvar* vars;
+	if(mb_delay==0) {
+		for(mb_tmp=0;mb_tmp<mb_mvar_reqs[mb_cnt].req_length;mb_tmp++) {
+			tx_mod_buf[mb_tmp] = mb_mvar_reqs[mb_cnt].request[mb_tmp];
+			if(mb_mvar_reqs[mb_cnt].wr_flag) {
+				vars = mb_mvar_reqs[mb_cnt].vars_ptr;
+				for(mb_tmp2=0;mb_tmp2<mb_mvar_reqs[mb_cnt].var_cnt;mb_tmp2++) {
+					mb_value = *(vars->ptr);
+					if(vars->bit_offset == -1) {
+						tx_mod_buf[vars->start_byte_num+7] = mb_value >> 8;
+						tx_mod_buf[vars->start_byte_num+8] = mb_value & 0xFF;
+					}else {
+						if(mb_value) tx_mod_buf[vars->start_byte_num+7] |= 1 << vars->bit_offset;
+					}
+					vars++;
+				}
+				mb_tmp2 = GetCRC16(tx_mod_buf,mb_mvar_reqs[mb_cnt].req_length-2);
+				tx_mod_buf[mb_mvar_reqs[mb_cnt].req_length-2] = mb_tmp2 >> 8;
+				tx_mod_buf[mb_mvar_reqs[mb_cnt].req_length-1] = mb_tmp2 & 0xFF;
+			}
+		}
+		write_module(mb_tmp);
+		rx_mod_cnt=0;
+	}
+	mb_delay++;
+	if(mb_delay>=modbus_delay) {
+		mb_delay = 0;
+		// анализ ответа
+		if(rx_mod_cnt==mb_mvar_reqs[mb_cnt].answer_length){
+			if(GetCRC16(rx_mod_buf,rx_mod_cnt)==0) {
+				if(rx_mod_buf[0]==tx_mod_buf[0]) {
+					if(mb_mvar_reqs[mb_cnt].wr_flag==0) {
+						vars = mb_mvar_reqs[mb_cnt].vars_ptr;
+						for(mb_tmp=0;mb_tmp<mb_mvar_reqs[mb_cnt].var_cnt;mb_tmp++) {
+							if(vars->bit_offset == -1) {
+								mb_value = (((unsigned short)rx_mod_buf[vars->start_byte_num+3])<<8) | (unsigned char)rx_mod_buf[vars->start_byte_num + 4];
+								*(vars->ptr) = mb_value;
+								err_mod[tx_mod_buf[0]] = 0;
+							}else {
+								if(rx_mod_buf[vars->start_byte_num+3] & (1<<vars->bit_offset)) mb_value=1;else mb_value = 0;
+								*(vars->ptr) = mb_value;
+								err_mod[tx_mod_buf[0]] = 0;
+							}
+							vars++;
+						}
+					}else err_mod[tx_mod_buf[0]] = 0;
+				}else if(err_mod[tx_mod_buf[0]] <255) err_mod[tx_mod_buf[0]]++;
+			}else if(err_mod[tx_mod_buf[0]] <255) err_mod[tx_mod_buf[0]]++;
+		}else if(err_mod[tx_mod_buf[0]] <255) err_mod[tx_mod_buf[0]]++;
+		mb_cnt++;
+		if(mb_cnt>=mb_req_count) {mb_cnt = 0;}
+	}
+}
+
 void InOutTask( void *pvParameters )
 {
 
@@ -101,7 +167,8 @@ void InOutTask( void *pvParameters )
 		}
 		main_step++;
 		if(main_step>1) main_step=0;
-		if((mod_table[0])&&(emu_mode!=2)) {mmb_work();}
+		if(mb_req_count&&(emu_mode!=2)) mb_modbus();
+		else if((mod_table[0])&&(emu_mode!=2)) {mmb_work();}
 		else
 		{
 			exchange_work();
