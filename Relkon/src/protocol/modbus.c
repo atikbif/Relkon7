@@ -32,6 +32,9 @@ extern portTickType PCxLastExecutionTime;
 //extern portTickType RFxLastExecutionTime;
 extern portTickType PRxLastExecutionTime;
 
+extern const unsigned short emem_size;
+extern unsigned short* emem_ptr;
+
 static const unsigned char ascii_code[16]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
 static unsigned short get_error(request* req, unsigned char code);
@@ -156,11 +159,25 @@ unsigned short read_holdregs(request* req)
 	unsigned short tmp,byte_count;
 	unsigned char err_cnt=0;
 	if((req->cnt >= 129)||(req->cnt == 0)||((req->cnt == 128)&&(req->addr >= 0x8000))) return(get_error(req,0x03));
-	if((req->addr + req->cnt >= 129)&&(req->addr < 0x8000)) return(get_error(req,0x02));
+	if((req->addr + req->cnt >= 129+emem_size)&&(req->addr < 0x8000)) return(get_error(req,0x02));
 	if(req->addr<0x8000)
 	{
 		for(tmp=0;tmp<req->cnt;tmp++)
-		{req->tx_buf[3+tmp*2]=MEM_2(req->addr+tmp)>>8;req->tx_buf[4+tmp*2]=MEM_2(req->addr+tmp)&0xFF;}
+		{
+			if(req->addr+tmp < 128) {
+				req->tx_buf[3+tmp*2]=MEM_2(req->addr+tmp)>>8;
+				req->tx_buf[4+tmp*2]=MEM_2(req->addr+tmp)&0xFF;
+			}else {
+				if(req->addr+tmp-128<emem_size) {
+					req->tx_buf[3+tmp*2]=emem_ptr[req->addr+tmp-128]>>8;
+					req->tx_buf[4+tmp*2]=emem_ptr[req->addr+tmp-128]&0xFF;
+				}else {
+					req->tx_buf[3+tmp*2]=0;
+					req->tx_buf[4+tmp*2]=0;
+				}
+				
+			}
+		}
 	}
 	else
 	{
@@ -259,8 +276,11 @@ unsigned short write_single_reg(request* req)
 {
 	unsigned short tmp,byte_count;
 	unsigned char err_cnt=0;
-	if((req->addr >= 128)&&(req->addr < 0x8000)) return(get_error(req,0x02));
-	if(req->addr < 0x8000) _Sys.Mem.b2[req->addr]=req->cnt;
+	if((req->addr >= 128+emem_size)&&(req->addr < 0x8000)) return(get_error(req,0x02));
+	if(req->addr < 0x8000) {
+		if(req->addr<128) _Sys.Mem.b2[req->addr]=req->cnt;
+		else if(req->addr-128<emem_size) emem_ptr[req->addr-128]=req->cnt;
+	}
 	else
 	{
 		req->addr-=0x8000;
@@ -310,11 +330,17 @@ unsigned short write_multi_regs(request* req)
 	unsigned short tmp,byte_count;
 	unsigned char err_cnt=0;
 	if((req->cnt >= 129)||(req->cnt == 0)||((req->cnt == 128)&&(req->addr >= 0x8000))) return(get_error(req,0x03));
-	if((req->addr+req->cnt>=129)&&(req->addr<0x8000)) return(get_error(req,0x02));
+	if((req->addr+req->cnt>=129+emem_size)&&(req->addr<0x8000)) return(get_error(req,0x02));
 	if(req->addr<0x8000)
 	{
 		for(tmp=0;tmp<req->cnt;tmp++)
-			{MEM_2(req->addr+tmp)=req->rx_buf[8+tmp*2] | ((unsigned short)req->rx_buf[7+tmp*2]<<8);}
+		{
+			if(req->addr+tmp<128) {
+				MEM_2(req->addr+tmp)=req->rx_buf[8+tmp*2] | ((unsigned short)req->rx_buf[7+tmp*2]<<8);
+			}else if(req->addr+tmp-128<emem_size) {
+				emem_ptr[req->addr+tmp-128] = req->rx_buf[8+tmp*2] | ((unsigned short)req->rx_buf[7+tmp*2]<<8);
+			}
+		}
 	}
 	else
 	{

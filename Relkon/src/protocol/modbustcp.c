@@ -25,6 +25,9 @@ extern volatile unsigned char _Sys_SPI_Buzy;
 
 #define MEM_2(a)           _Sys.Mem.b2[(a)]
 
+extern const unsigned short emem_size;
+extern unsigned short* emem_ptr;
+
 static unsigned short get_error(request* req, unsigned char code);
 
 static unsigned short get_error(request* req, unsigned char code)
@@ -106,7 +109,7 @@ unsigned short tcpread_holdregs(request* req)
 	unsigned short tmp,byte_count,len;
 	unsigned char err_cnt=0;
 	if((req->cnt >= 129)||(req->cnt == 0)||((req->cnt == 128)&&(req->addr >= 0x8000))) return(get_error(req,0x03));
-	if((req->addr + req->cnt >= 129)&&(req->addr < 0x8000)) return(get_error(req,0x02));
+	if((req->addr + req->cnt >= 129 + emem_size)&&(req->addr < 0x8000)) return(get_error(req,0x02));
 
 	req->tx_buf[0] = req->rx_buf[0];
 	req->tx_buf[1] = req->rx_buf[1];							// transaction identifier
@@ -116,7 +119,22 @@ unsigned short tcpread_holdregs(request* req)
 	if(req->addr<0x8000)
 	{
 		for(tmp=0;tmp<req->cnt;tmp++)
-		{req->tx_buf[7+2+tmp*2]=MEM_2(req->addr+tmp)>>8;req->tx_buf[7+3+tmp*2]=MEM_2(req->addr+tmp)&0xFF;}
+		{
+			
+			
+			if(req->addr+tmp < 128) {
+				req->tx_buf[7+2+tmp*2]=MEM_2(req->addr+tmp)>>8;
+				req->tx_buf[7+3+tmp*2]=MEM_2(req->addr+tmp)&0xFF;
+			}else {
+				if(req->addr+tmp-128<emem_size) {
+					req->tx_buf[7+2+tmp*2]=emem_ptr[req->addr+tmp-128]>>8;
+					req->tx_buf[7+3+tmp*2]=emem_ptr[req->addr+tmp-128]&0xFF;
+				}else {
+					req->tx_buf[7+2+tmp*2]=0;
+					req->tx_buf[7+3+tmp*2]=0;
+				}
+			}
+		}
 	}
 	else
 	{
@@ -193,14 +211,17 @@ unsigned short tcpwrite_single_reg(request* req)
 	unsigned short byte_count,len;
 	unsigned short tmp_addr;
 	unsigned char err_cnt=0;
-	if((req->addr >= 128)&&(req->addr < 0x8000)) return(get_error(req,0x02));
+	if((req->addr >= 128 + emem_size)&&(req->addr < 0x8000)) return(get_error(req,0x02));
 
 	req->tx_buf[0] = req->rx_buf[0];
 	req->tx_buf[1] = req->rx_buf[1];							// transaction identifier
 	req->tx_buf[2] = 0;req->tx_buf[3] = 0;						// protocol identifier
 	req->tx_buf[6] = req->rx_buf[6];							// unit id
 
-	if(req->addr < 0x8000) _Sys.Mem.b2[req->addr]=req->cnt;
+	if(req->addr < 0x8000) {
+		if(req->addr<128) _Sys.Mem.b2[req->addr]=req->cnt;
+		else if(req->addr-128<emem_size) emem_ptr[req->addr-128]=req->cnt;
+	}
 	else
 	{
 		tmp_addr = req->addr - 0x8000;
@@ -239,7 +260,7 @@ unsigned short tcpwrite_multi_regs(request* req)
 	unsigned short tmp_addr;
 	unsigned char err_cnt=0;
 	if((req->cnt >= 129)||(req->cnt == 0)||((req->cnt == 128)&&(req->addr >= 0x8000))) return(get_error(req,0x03));
-	if((req->addr+req->cnt>=129)&&(req->addr<0x8000)) return(get_error(req,0x02));
+	if((req->addr+req->cnt>=129 + emem_size)&&(req->addr<0x8000)) return(get_error(req,0x02));
 
 	req->tx_buf[0] = req->rx_buf[0];
 	req->tx_buf[1] = req->rx_buf[1];							// transaction identifier
@@ -249,7 +270,13 @@ unsigned short tcpwrite_multi_regs(request* req)
 	if(req->addr<0x8000)
 	{
 		for(tmp=0;tmp<req->cnt;tmp++)
-			{MEM_2(req->addr+tmp)=req->rx_buf[7+7+tmp*2] | ((unsigned short)req->rx_buf[7+6+tmp*2]<<8);}
+		{
+			if(req->addr+tmp<128) {
+				MEM_2(req->addr+tmp)=req->rx_buf[7+7+tmp*2] | ((unsigned short)req->rx_buf[7+6+tmp*2]<<8);
+			}else if(req->addr+tmp-128<emem_size) {
+				emem_ptr[req->addr+tmp-128] = req->rx_buf[7+7+tmp*2] | ((unsigned short)req->rx_buf[7+6+tmp*2]<<8);
+			}
+		}
 	}
 	else
 	{
