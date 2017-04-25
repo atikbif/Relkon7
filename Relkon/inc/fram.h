@@ -5,5 +5,6 @@
 
 void write_fram(unsigned short adr,unsigned char size,unsigned char* ptr);
 void read_fram(unsigned short adr,unsigned char size,unsigned char* ptr);
+unsigned char get_ee_addr(unsigned short num);
 
 #endif /* FRAM_H_ */

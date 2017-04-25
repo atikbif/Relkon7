@@ -43,5 +43,9 @@ void read_fram(unsigned short adr,unsigned char size,unsigned char* ptr)
     portENABLE_INTERRUPTS();
 }
 
+unsigned char get_ee_addr(unsigned short num) {
+	return 0x7B00 + num;
+}
+
 
 
