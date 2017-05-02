@@ -38,6 +38,7 @@ extern plc_stat _Sys;
 volatile unsigned char prot_enable=1;
 volatile unsigned short tx_mb_tmr = 0;
 request req_mb;
+extern unsigned char modbus_master_emu;
 
 unsigned short rx_req_cnt_mmb=0;
 
@@ -167,7 +168,8 @@ void InOutTask( void *pvParameters )
 		}
 		main_step++;
 		if(main_step>1) main_step=0;
-		if(mb_req_count&&(emu_mode!=2)) mb_modbus();
+		
+		if(mb_req_count&&(modbus_master_emu==0)) mb_modbus();
 		else if((mod_table[0])&&(emu_mode!=2)) {mmb_work();}
 		else
 		{
