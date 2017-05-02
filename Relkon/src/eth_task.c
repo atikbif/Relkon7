@@ -52,7 +52,7 @@ void EthTask( void *pvParameters )
 				if(ENET_Configuration())	// конфигурация mac уровня
 				{
 					//s_ip[0]=192;s_ip[1]=168;s_ip[2]=1;s_ip[3]=15; // настройка ip адреса контроллера
-					get_ip(s_ip);s_ip[3]=1;set_gate(s_ip); // настройка ip адреса шлюза
+					//get_ip(s_ip);s_ip[3]=1;set_gate(s_ip); // настройка ip адреса шлюза
 					init_arp_tab();	// инициализация arp таблицы
 					// инициализация протоколов udp,tcp/ip,http
 					udp_init();
