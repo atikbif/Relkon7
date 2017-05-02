@@ -47,6 +47,7 @@ extern unsigned char wifi_ip[4];*/
 static unsigned char ip_addr[4]={0,0,0,0};			// IP и MAC для сети ethernet
 static unsigned char mac_addr[6]={0,0,0,0,0,0};
 static unsigned char ip_gate[4]={0,0,0,0};
+static unsigned char ip_mask[4]={0,0,0,0};
 
 unsigned char pult_dis,sd_dis;						// флаги разрешения пульта и sd карты
 
@@ -57,6 +58,8 @@ extern const unsigned short S4_max;					// максимально допустимый номер нижней с
 extern volatile unsigned long tcp_tmr;
 
 volatile float adc_coeff = 125.0/127;
+
+unsigned char modbus_master_emu = 0;
 
 static void prvFlashTask( void *pvParameters );
 
@@ -123,6 +126,8 @@ int main(void)
   read_data(0x7F,0x4C,4,ip_addr);set_ip(ip_addr);
   read_data(0x7F,0x50,6,mac_addr);set_mac(mac_addr);
   read_data(0x7F,0x5A,4,ip_gate);set_gate(ip_gate);
+  read_data(0x7F,0x5E,1,&modbus_master_emu);
+  read_data(0x7F,0x5F,4,ip_mask);set_mask(ip_mask);
   
 #if FRAM_YEAR
   read_data(0x7F,0x56,1,(unsigned char*)&times.year);
